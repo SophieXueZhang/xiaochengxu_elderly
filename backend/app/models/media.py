@@ -34,7 +34,7 @@ class MediaAsset(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     # 元数据
-    metadata = Column(JSON, default={})
+    extra_metadata = Column("metadata", JSON, default={})
 
     def __repr__(self):
         return f"<MediaAsset {self.id}: {self.file_type} - {self.purpose}>"

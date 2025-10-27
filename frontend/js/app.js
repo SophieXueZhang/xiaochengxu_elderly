@@ -1,7 +1,10 @@
 // 永伴 - 前端应用逻辑
 
 // API配置
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+// 自动检测：如果访问的是外网地址，则使用同源API；否则使用localhost
+const API_BASE_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:8000/api/v1'
+    : `${window.location.protocol}//${window.location.hostname}/api/v1`;
 
 // 全局状态
 let currentUser = null;
@@ -354,9 +357,9 @@ async function sendMessage() {
     addMessage('user', message);
     input.value = '';
 
-    // 显示输入中提示
-    const thinkingMsg = addMessage('assistant', '正在思考...');
-    showLoading(true);
+    // 显示输入中提示（带动画效果）
+    const thinkingMsg = addMessage('assistant', '<span class="typing-indicator">正在输入<span class="dots">...</span></span>');
+    // showLoading(true);  // 移除全屏加载遮罩，保留"正在思考..."提示即可
 
     try {
         const response = await apiRequest('/conversations/chat', {
@@ -386,7 +389,7 @@ async function sendMessage() {
         thinkingMsg.remove();
         showToast('发送失败：' + error.message);
     } finally {
-        showLoading(false);
+        // showLoading(false);  // 移除全屏加载遮罩
     }
 }
 

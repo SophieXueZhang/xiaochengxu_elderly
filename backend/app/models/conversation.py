@@ -1,7 +1,7 @@
 """
 对话相关数据模型
 """
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON, Float
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON, Float, Boolean
 from sqlalchemy.sql import func
 
 from app.core.database import Base
@@ -29,7 +29,7 @@ class Conversation(Base):
     ended_at = Column(DateTime, nullable=True)
 
     # 元数据
-    metadata = Column(JSON, default={})
+    extra_metadata = Column("metadata", JSON, default={})
 
     def __repr__(self):
         return f"<Conversation {self.id}: {self.title}>"
@@ -69,7 +69,7 @@ class Message(Base):
     created_at = Column(DateTime, server_default=func.now(), index=True)
 
     # 元数据
-    metadata = Column(JSON, default={})
+    extra_metadata = Column("metadata", JSON, default={})
 
     def __repr__(self):
         return f"<Message {self.id}: {self.role} - {self.content[:30]}>"

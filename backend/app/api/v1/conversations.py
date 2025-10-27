@@ -82,14 +82,15 @@ async def chat(
     db.add(user_message)
     db.flush()
 
-    # 分析用户消息情感
-    try:
-        emotion_data = await ai_service.analyze_emotion(request.message)
-        user_message.emotion = emotion_data.get("emotion")
-        user_message.sentiment = emotion_data.get("sentiment")
-        user_message.emotion_score = emotion_data.get("score")
-    except:
-        pass
+    # 分析用户消息情感（已禁用以提升性能）
+    # 情感分析改为异步后台任务，或使用本地模型
+    # try:
+    #     emotion_data = await ai_service.analyze_emotion(request.message)
+    #     user_message.emotion = emotion_data.get("emotion")
+    #     user_message.sentiment = emotion_data.get("sentiment")
+    #     user_message.emotion_score = emotion_data.get("score")
+    # except:
+    #     pass
 
     # 获取对话历史（最近10条）
     recent_messages = db.query(Message).filter(
@@ -130,8 +131,8 @@ async def chat(
         ai_response = await ai_service.generate_response(
             system_prompt=companion.system_prompt or "你是一个关心用户的AI助手。",
             messages=context_messages,
-            temperature=0.7,
-            max_tokens=500,
+            temperature=0.8,  # 略微提高创造性
+            max_tokens=200,   # 减少token数，加快响应（原500太多）
         )
 
         # 保存AI回复

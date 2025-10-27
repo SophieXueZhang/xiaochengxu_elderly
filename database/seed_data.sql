@@ -5,10 +5,11 @@
 -- ============================================================================
 
 -- 插入测试用户
+-- 所有测试用户的密码都是: password123
 INSERT INTO users (phone, email, password_hash, nickname, gender, subscription_type, subscription_expires_at) VALUES
-('13800138000', 'test1@example.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5fSU0Gp8c0Kha', '张阿姨', 'female', 'premium', CURRENT_TIMESTAMP + INTERVAL '1 month'),
-('13800138001', 'test2@example.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5fSU0Gp8c0Kha', '李大爷', 'male', 'free', NULL),
-('13800138002', 'test3@example.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5fSU0Gp8c0Kha', '王女士', 'female', 'free', NULL);
+('13800138000', 'test1@example.com', '$2b$12$Spoh2RXYugtum9A.lSecV.J9LZqB2mMPwiT6fZ6RPz06fEjAu5xrG', '张阿姨', 'female', 'premium', CURRENT_TIMESTAMP + INTERVAL '1 month'),
+('13800138001', 'test2@example.com', '$2b$12$Spoh2RXYugtum9A.lSecV.J9LZqB2mMPwiT6fZ6RPz06fEjAu5xrG', '李大爷', 'male', 'free', NULL),
+('13800138002', 'test3@example.com', '$2b$12$Spoh2RXYugtum9A.lSecV.J9LZqB2mMPwiT6fZ6RPz06fEjAu5xrG', '王女士', 'female', 'free', NULL);
 
 -- ============================================================================
 -- 测试角色数据

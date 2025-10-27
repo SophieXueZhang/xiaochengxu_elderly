@@ -55,3 +55,10 @@ Thumbs.db
 # 临时文件
 *.tmp
 *.bak
+
+# ngrok 和 nginx 临时文件
+/tmp/ngrok*.log
+nginx-proxy.conf.backup
+
+# 前端配置备份
+frontend/js/app.js.backup

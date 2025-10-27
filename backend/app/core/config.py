@@ -3,7 +3,7 @@
 """
 from typing import Optional, List
 from pydantic_settings import BaseSettings
-from pydantic import validator
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -27,13 +27,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7天
 
     # CORS配置
-    BACKEND_CORS_ORIGINS: List[str] = ["*"]
-
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
-    def assemble_cors_origins(cls, v):
-        if isinstance(v, str):
-            return [i.strip() for i in v.split(",")]
-        return v
+    BACKEND_CORS_ORIGINS: str = "*"
 
     # 数据库配置
     POSTGRES_HOST: str = "localhost"

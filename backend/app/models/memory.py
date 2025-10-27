@@ -37,7 +37,7 @@ class Memory(Base):
     expires_at = Column(DateTime, nullable=True)
 
     # 元数据
-    metadata = Column(JSON, default={})
+    extra_metadata = Column("metadata", JSON, default={})
 
     def __repr__(self):
         return f"<Memory {self.id}: {self.memory_type} - {self.content[:30]}>"

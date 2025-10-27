@@ -11,16 +11,17 @@ sqlalchemy==2.0.25
 alembic==1.13.1
 
 # Redis
-redis==5.0.1
+redis==4.6.0
 hiredis==2.3.2
 
 # 认证与安全
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
 python-dotenv==1.0.0
 
 # AI服务
-openai==1.10.0
+openai==0.28.1
 anthropic==0.8.1
 
 # 语音服务

@@ -496,3 +496,24 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #999;
 }
+
+/* 打字动画效果 */
+.typing-indicator {
+    display: inline-block;
+}
+
+.typing-indicator .dots {
+    animation: typing-dots 1.5s infinite;
+}
+
+@keyframes typing-dots {
+    0%, 20% {
+        opacity: 0;
+    }
+    40% {
+        opacity: 0.5;
+    }
+    60%, 100% {
+        opacity: 1;
+    }
+}
