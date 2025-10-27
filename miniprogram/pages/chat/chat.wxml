@@ -1,0 +1,81 @@
+<!--pages/chat/chat.wxml-->
+<view class="page">
+  <!-- 消息列表 -->
+  <scroll-view
+    class="chat-messages"
+    scroll-y="true"
+    scroll-into-view="{{scrollToView}}"
+    scroll-with-animation="true"
+  >
+    <!-- 加载历史消息提示 -->
+    <view wx:if="{{hasMoreHistory}}" class="load-more" bindtap="loadHistory">
+      <text>加载更多历史消息</text>
+    </view>
+
+    <!-- 消息列表 -->
+    <view wx:for="{{messages}}" wx:key="id" id="msg-{{item.id}}" class="message-item">
+      <!-- 用户消息 -->
+      <view wx:if="{{item.role === 'user'}}" class="message message-user">
+        <view class="message-content">
+          <text>{{item.content}}</text>
+        </view>
+        <view class="message-avatar">
+          <text class="avatar-text">我</text>
+        </view>
+      </view>
+
+      <!-- AI消息 -->
+      <view wx:else class="message message-assistant">
+        <view class="message-avatar">
+          <text class="avatar-text">{{companionName.charAt(0)}}</text>
+        </view>
+        <view class="message-content">
+          <text>{{item.content}}</text>
+        </view>
+      </view>
+
+      <!-- 时间戳 -->
+      <view class="message-time">
+        {{item.timeText}}
+      </view>
+    </view>
+
+    <!-- AI思考中 -->
+    <view wx:if="{{thinking}}" class="message message-assistant">
+      <view class="message-avatar">
+        <text class="avatar-text">{{companionName.charAt(0)}}</text>
+      </view>
+      <view class="message-content thinking">
+        <view class="typing-indicator">
+          <view class="dot"></view>
+          <view class="dot"></view>
+          <view class="dot"></view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 输入区域 -->
+  <view class="chat-input-container">
+    <view class="chat-input-area">
+      <textarea
+        class="chat-input"
+        placeholder="输入您想说的话..."
+        placeholder-class="input-placeholder"
+        value="{{inputText}}"
+        bindinput="onInput"
+        auto-height
+        maxlength="500"
+        show-confirm-bar="{{false}}"
+        adjust-position="{{true}}"
+      />
+      <button
+        class="btn-send"
+        bindtap="sendMessage"
+        disabled="{{!inputText || sending}}"
+      >
+        发送
+      </button>
+    </view>
+  </view>
+</view>
