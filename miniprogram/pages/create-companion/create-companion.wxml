@@ -1,0 +1,72 @@
+<!--pages/create-companion/create-companion.wxml-->
+<view class="page">
+  <view class="container">
+    <view class="card">
+      <view class="page-title">创建陪伴角色</view>
+
+      <view class="form-group">
+        <text class="form-label">角色名称</text>
+        <input
+          class="input-large"
+          type="text"
+          placeholder="例如：妈妈、老伴、老友"
+          placeholder-class="input-placeholder"
+          value="{{name}}"
+          bindinput="onNameInput"
+        />
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">角色关系</text>
+        <picker
+          mode="selector"
+          range="{{relationshipOptions}}"
+          range-key="label"
+          value="{{relationshipIndex}}"
+          bindchange="onRelationshipChange"
+        >
+          <view class="picker-view">
+            {{relationshipOptions[relationshipIndex].label}}
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">性别</text>
+        <picker
+          mode="selector"
+          range="{{genderOptions}}"
+          range-key="label"
+          value="{{genderIndex}}"
+          bindchange="onGenderChange"
+        >
+          <view class="picker-view">
+            {{genderOptions[genderIndex].label}}
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">角色背景</text>
+        <textarea
+          class="textarea-large"
+          placeholder="描述一下这个角色的性格、习惯、特点等...&#10;例如：一位慈爱的母亲，生前最爱做饭，总是关心孩子的生活起居"
+          placeholder-class="input-placeholder"
+          value="{{backgroundStory}}"
+          bindinput="onStoryInput"
+          maxlength="500"
+          show-confirm-bar="{{false}}"
+        />
+        <view class="char-count">{{backgroundStory.length}}/500</view>
+      </view>
+
+      <button
+        class="btn btn-primary btn-large"
+        bindtap="handleCreate"
+        disabled="{{loading}}"
+      >
+        {{loading ? '创建中...' : '创建角色'}}
+      </button>
+    </view>
+  </view>
+</view>

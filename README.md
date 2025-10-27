@@ -27,6 +27,32 @@
 - 🗣️ ElevenLabs语音合成
 - 🧠 Qdrant向量数据库 + 长期记忆
 - 📦 Docker一键部署
+- 📱 微信小程序原生开发
+
+## 项目组成
+
+本项目包含两个主要部分：
+
+### 1. 后端API服务 (backend/)
+
+基于FastAPI的RESTful API服务，提供所有核心功能的接口支持。
+
+### 2. 微信小程序 (miniprogram/)
+
+**✨ 新增：微信小程序版本已完成！**
+
+专为中老年用户设计的微信小程序客户端，具有以下特点：
+
+- 📱 **原生小程序开发**: 流畅的用户体验
+- 👴 **老年友好设计**: 大字体、高对比度、简洁界面
+- 💬 **完整功能支持**: 登录、角色管理、智能对话
+- 🎯 **易于操作**: 符合老年用户使用习惯
+
+快速开始微信小程序开发，请查看 [miniprogram/README.md](./miniprogram/README.md)
+
+### 3. Web前端 (frontend/)
+
+简单的Web界面（可选），用于演示和测试。
 
 ## 快速开始
 
@@ -227,11 +253,26 @@ yongban/
 │   │   └── main.py            # 应用入口
 │   ├── requirements.txt       # Python依赖
 │   └── Dockerfile
+├── miniprogram/              # 微信小程序 ✨
+│   ├── pages/               # 小程序页面
+│   │   ├── login/          # 登录页
+│   │   ├── register/       # 注册页
+│   │   ├── companions/     # 角色列表页
+│   │   ├── create-companion/ # 创建角色页
+│   │   └── chat/           # 聊天对话页
+│   ├── utils/              # 工具类
+│   │   ├── api.js          # API接口封装
+│   │   └── util.js         # 通用工具
+│   ├── images/             # 图片资源
+│   ├── app.js              # 小程序入口
+│   ├── app.json            # 小程序配置
+│   ├── app.wxss            # 全局样式
+│   └── README.md           # 小程序文档
 ├── database/                  # 数据库
 │   ├── schema.sql            # 数据库结构
 │   └── seed_data.sql         # 测试数据
 ├── docs/                     # 文档
-├── frontend/                 # 前端（未来）
+├── frontend/                 # Web前端
 ├── scripts/                  # 工具脚本
 ├── docker-compose.yml        # Docker编排
 ├── .env.example             # 环境变量示例
