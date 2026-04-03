@@ -1,0 +1,22 @@
+<!-- components/video-message/video-message.wxml -->
+<view class="video-message {{alignRight ? 'align-right' : 'align-left'}}">
+  <video
+    class="video-player"
+    src="{{videoData.url}}"
+    poster="{{videoData.thumbnail}}"
+    controls
+    show-center-play-btn="{{true}}"
+    show-play-btn="{{true}}"
+    enable-play-gesture="{{true}}"
+    object-fit="contain"
+  />
+
+  <view class="video-info">
+    <text class="duration">{{formattedDuration}}</text>
+    <text wx:if="{{videoData.size}}" class="size">{{formattedSize}}</text>
+  </view>
+
+  <view wx:if="{{caption}}" class="caption">
+    <text>{{caption}}</text>
+  </view>
+</view>

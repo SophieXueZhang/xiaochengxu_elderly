@@ -146,10 +146,36 @@
   padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
 }
 
+/* 媒体按钮 */
+.media-btns {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.media-btn {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F5F7FA;
+  border-radius: 12rpx;
+  border: 2rpx solid #E1E4E8;
+}
+
+.media-btn .icon {
+  font-size: 40rpx;
+}
+
+.media-btn:active {
+  background: #E1E4E8;
+}
+
 .chat-input-area {
   display: flex;
   align-items: flex-end;
-  gap: 20rpx;
+  gap: 15rpx;
 }
 
 .chat-input {

@@ -230,5 +230,145 @@ Page({
         scrollToView: `msg-${lastMessage.id}`
       });
     }
+  },
+
+  /**
+   * 选择视频
+   */
+  chooseVideo() {
+    const that = this;
+
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['video'],
+      sourceType: ['album', 'camera'],
+      maxDuration: 60,
+      camera: 'back',
+      success(res) {
+        const media = res.tempFiles[0];
+        const { tempFilePath, size, duration } = media;
+
+        // 检查视频大小（50MB限制）
+        if (size > 50 * 1024 * 1024) {
+          util.showToast('视频大小不能超过50MB');
+          return;
+        }
+
+        // 检查时长（60秒限制）
+        if (duration > 60) {
+          util.showToast('视频时长不能超过60秒');
+          return;
+        }
+
+        // 显示预览确认
+        that.showVideoPreview(tempFilePath, duration, size);
+      },
+      fail(err) {
+        console.error('选择视频失败:', err);
+        if (err.errMsg && !err.errMsg.includes('cancel')) {
+          util.showToast('选择视频失败');
+        }
+      }
+    });
+  },
+
+  /**
+   * 显示视频预览
+   */
+  showVideoPreview(filePath, duration, size) {
+    const durationText = `${Math.floor(duration)}秒`;
+    const sizeText = `${(size / (1024 * 1024)).toFixed(1)}MB`;
+
+    wx.showModal({
+      title: '确认发送视频？',
+      content: `时长：${durationText}\n大小：${sizeText}`,
+      confirmText: '发送',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          // 询问是否添加文字说明
+          this.askForCaption(filePath);
+        }
+      }
+    });
+  },
+
+  /**
+   * 询问视频说明
+   */
+  askForCaption(filePath) {
+    const that = this;
+
+    wx.showModal({
+      title: '添加说明',
+      content: '要为这个视频添加文字说明吗？',
+      confirmText: '添加',
+      cancelText: '直接发送',
+      success(res) {
+        if (res.confirm) {
+          // 弹出输入框
+          that.showCaptionInput(filePath);
+        } else {
+          // 直接发送
+          that.uploadAndSendVideo(filePath, '');
+        }
+      }
+    });
+  },
+
+  /**
+   * 显示说明输入框
+   */
+  showCaptionInput(filePath) {
+    const that = this;
+
+    // 使用自定义模态框或直接上传
+    // 这里简化处理，使用输入文本后发送
+    wx.showModal({
+      title: '视频说明',
+      editable: true,
+      placeholderText: '例如：今天跳舞的视频',
+      success(res) {
+        if (res.confirm) {
+          const caption = res.content || '';
+          that.uploadAndSendVideo(filePath, caption);
+        }
+      }
+    });
+  },
+
+  /**
+   * 上传并发送视频
+   */
+  uploadAndSendVideo(filePath, caption) {
+    const { companionId } = this.data;
+
+    util.showLoading('上传中...');
+
+    // 上传视频
+    API.uploadVideo(filePath, companionId)
+      .then(videoData => {
+        // 发送视频消息
+        return API.sendVideoMessage(companionId, videoData.media_id, caption);
+      })
+      .then(data => {
+        util.hideLoading();
+        util.showSuccess('发送成功');
+
+        // 添加消息到界面
+        const userMessage = { ...data.user_message, timeText: '刚刚' };
+        const assistantMessage = { ...data.assistant_message, timeText: '刚刚' };
+
+        this.setData({
+          messages: [...this.data.messages, userMessage, assistantMessage]
+        });
+
+        this.scrollToBottom();
+      })
+      .catch(err => {
+        util.hideLoading();
+        console.error('发送视频失败:', err);
+        util.showError(err.message || '发送失败，请重试');
+      });
   }
 });

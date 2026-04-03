@@ -16,7 +16,15 @@
     <view wx:for="{{messages}}" wx:key="id" id="msg-{{item.id}}" class="message-item">
       <!-- 用户消息 -->
       <view wx:if="{{item.role === 'user'}}" class="message message-user">
-        <view class="message-content">
+        <!-- 视频消息 -->
+        <video-message
+          wx:if="{{item.type === 'video'}}"
+          videoData="{{item.media}}"
+          caption="{{item.content}}"
+          alignRight="{{true}}"
+        />
+        <!-- 文字消息 -->
+        <view wx:else class="message-content">
           <text>{{item.content}}</text>
         </view>
         <view class="message-avatar">
@@ -29,6 +37,7 @@
         <view class="message-avatar">
           <text class="avatar-text">{{companionName.charAt(0)}}</text>
         </view>
+        <!-- AI只返回文字 -->
         <view class="message-content">
           <text>{{item.content}}</text>
         </view>
@@ -58,6 +67,13 @@
   <!-- 输入区域 -->
   <view class="chat-input-container">
     <view class="chat-input-area">
+      <!-- 多媒体按钮 -->
+      <view class="media-btns">
+        <view class="media-btn" bindtap="chooseVideo">
+          <text class="icon">📹</text>
+        </view>
+      </view>
+
       <textarea
         class="chat-input"
         placeholder="输入您想说的话..."
