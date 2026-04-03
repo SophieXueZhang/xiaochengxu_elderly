@@ -3,6 +3,7 @@
   "enablePullDownRefresh": false,
   "disableScroll": true,
   "usingComponents": {
-    "video-message": "/components/video-message/video-message"
+    "video-message": "/components/video-message/video-message",
+    "image-message": "/components/image-message/image-message"
   }
 }

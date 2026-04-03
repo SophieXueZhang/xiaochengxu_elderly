@@ -23,6 +23,13 @@
           caption="{{item.content}}"
           alignRight="{{true}}"
         />
+        <!-- 图片消息 -->
+        <image-message
+          wx:elif="{{item.type === 'image'}}"
+          imageData="{{item.media}}"
+          caption="{{item.content}}"
+          alignRight="{{true}}"
+        />
         <!-- 文字消息 -->
         <view wx:else class="message-content">
           <text>{{item.content}}</text>
@@ -69,6 +76,9 @@
     <view class="chat-input-area">
       <!-- 多媒体按钮 -->
       <view class="media-btns">
+        <view class="media-btn" bindtap="chooseImage">
+          <text class="icon">🖼️</text>
+        </view>
         <view class="media-btn" bindtap="chooseVideo">
           <text class="icon">📹</text>
         </view>

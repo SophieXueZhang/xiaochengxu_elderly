@@ -434,6 +434,57 @@ const API = {
         caption: caption
       }
     });
+  },
+
+  /**
+   * 上传图片
+   */
+  uploadImage(filePath, companionId) {
+    return new Promise((resolve, reject) => {
+      const app = getApp();
+
+      wx.uploadFile({
+        url: `${app.globalData.apiBaseUrl}/media/upload-image`,
+        filePath: filePath,
+        name: 'image',
+        formData: {
+          companion_id: companionId
+        },
+        header: {
+          'Authorization': `Bearer ${app.globalData.accessToken}`
+        },
+        success(res) {
+          if (res.statusCode === 200) {
+            const data = JSON.parse(res.data);
+            if (data.success) {
+              resolve(data.data);
+            } else {
+              reject(new Error(data.message || '上传失败'));
+            }
+          } else {
+            reject(new Error(`上传失败(${res.statusCode})`));
+          }
+        },
+        fail(err) {
+          console.error('上传图片失败:', err);
+          reject(new Error('上传失败，请检查网络'));
+        }
+      });
+    });
+  },
+
+  /**
+   * 发送图片消息
+   */
+  sendImageMessage(companionId, mediaId, caption = '') {
+    return request('/conversations/send-image', {
+      method: 'POST',
+      data: {
+        companion_id: companionId,
+        media_id: mediaId,
+        caption: caption
+      }
+    });
   }
 };
 

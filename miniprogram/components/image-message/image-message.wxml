@@ -1,0 +1,14 @@
+<!-- components/image-message/image-message.wxml -->
+<view class="image-message {{alignRight ? 'align-right' : 'align-left'}}">
+  <image
+    class="message-image"
+    src="{{imageData.url}}"
+    mode="aspectFill"
+    bindtap="previewImage"
+    show-menu-by-longpress="{{true}}"
+  />
+
+  <view wx:if="{{caption}}" class="caption">
+    <text>{{caption}}</text>
+  </view>
+</view>

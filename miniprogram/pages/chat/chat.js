@@ -370,5 +370,73 @@ Page({
         console.error('发送视频失败:', err);
         util.showError(err.message || '发送失败，请重试');
       });
+  },
+
+  /**
+   * 选择图片
+   */
+  chooseImage() {
+    const that = this;
+
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      sizeType: ['compressed'],
+      success(res) {
+        const media = res.tempFiles[0];
+        const { tempFilePath, size } = media;
+
+        // 检查图片大小（10MB限制）
+        if (size > 10 * 1024 * 1024) {
+          util.showToast('图片大小不能超过10MB');
+          return;
+        }
+
+        // 直接上传（图片不需要预览）
+        that.uploadAndSendImage(tempFilePath);
+      },
+      fail(err) {
+        console.error('选择图片失败:', err);
+        if (err.errMsg && !err.errMsg.includes('cancel')) {
+          util.showToast('选择图片失败');
+        }
+      }
+    });
+  },
+
+  /**
+   * 上传并发送图片
+   */
+  uploadAndSendImage(filePath) {
+    const { companionId } = this.data;
+
+    util.showLoading('上传中...');
+
+    // 上传图片
+    API.uploadImage(filePath, companionId)
+      .then(imageData => {
+        // 发送图片消息
+        return API.sendImageMessage(companionId, imageData.media_id, '');
+      })
+      .then(data => {
+        util.hideLoading();
+        util.showSuccess('发送成功');
+
+        // 添加消息到界面
+        const userMessage = { ...data.user_message, timeText: '刚刚' };
+        const assistantMessage = { ...data.assistant_message, timeText: '刚刚' };
+
+        this.setData({
+          messages: [...this.data.messages, userMessage, assistantMessage]
+        });
+
+        this.scrollToBottom();
+      })
+      .catch(err => {
+        util.hideLoading();
+        console.error('发送图片失败:', err);
+        util.showError(err.message || '发送失败，请重试');
+      });
   }
 });
