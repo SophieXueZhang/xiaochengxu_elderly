@@ -2,6 +2,7 @@
 const app = getApp();
 const API = require('../../utils/api');
 const util = require('../../utils/util');
+const { validate } = require('../../utils/validator');
 
 Page({
   data: {
@@ -43,24 +44,10 @@ Page({
   handleLogin() {
     const { phone, password } = this.data;
 
-    // 验证输入
-    if (!phone) {
-      util.showToast('请输入手机号');
-      return;
-    }
-
-    if (!util.validatePhone(phone)) {
-      util.showToast('手机号格式不正确');
-      return;
-    }
-
-    if (!password) {
-      util.showToast('请输入密码');
-      return;
-    }
-
-    if (!util.validatePassword(password)) {
-      util.showToast('密码至少6位');
+    // 使用验证器验证
+    const result = validate.loginForm(phone, password);
+    if (!result.valid) {
+      util.showToast(result.error);
       return;
     }
 

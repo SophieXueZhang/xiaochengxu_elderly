@@ -110,86 +110,113 @@ Page({
   },
 
   /**
-   * 发送消息
+   * 发送消息（带防抖）
    */
-  sendMessage() {
+  sendMessage: util.throttle(function() {
     const { inputText, companionId, sending } = this.data;
 
-    // 防止重复发送
-    if (sending || !inputText.trim()) {
+    // 验证输入
+    if (!inputText || !inputText.trim()) {
+      util.showToast('请输入消息内容');
+      return;
+    }
+
+    if (sending) {
       return;
     }
 
     const messageContent = inputText.trim();
 
-    // 清空输入框
+    // 限制消息长度
+    if (messageContent.length > 500) {
+      util.showToast('消息内容不能超过500字');
+      return;
+    }
+
+    // 清空输入框并标记发送状态
     this.setData({
       inputText: '',
       sending: true
     });
 
-    // 添加用户消息到界面
-    const userMessage = {
-      id: `temp-user-${Date.now()}`,
-      role: 'user',
-      content: messageContent,
-      created_at: new Date().toISOString(),
-      timeText: '刚刚'
-    };
+    // 创建临时用户消息
+    const userMessage = this.createTempMessage('user', messageContent);
 
-    this.setData({
-      messages: [...this.data.messages, userMessage],
-      thinking: true
-    });
-
+    // 添加到界面
+    this.addMessage(userMessage);
+    this.setData({ thinking: true });
     this.scrollToBottom();
 
     // 发送到服务器
     API.sendMessage(messageContent, companionId, false)
-      .then(data => {
-        // 更新对话ID
-        if (data.conversation_id) {
-          this.setData({
-            conversationId: data.conversation_id
-          });
-        }
+      .then(data => this.handleSendSuccess(data, userMessage))
+      .catch(err => this.handleSendError(err, userMessage));
+  }, 1000),
 
-        // 替换临时用户消息
-        const messages = this.data.messages.filter(m => m.id !== userMessage.id);
+  /**
+   * 创建临时消息
+   */
+  createTempMessage(role, content) {
+    return {
+      id: `temp-${role}-${Date.now()}`,
+      role,
+      content,
+      created_at: new Date().toISOString(),
+      timeText: '刚刚'
+    };
+  },
 
-        // 添加真实的用户消息和AI回复
-        const realUserMessage = {
-          ...data.user_message,
-          timeText: '刚刚'
-        };
+  /**
+   * 添加消息到列表
+   */
+  addMessage(message) {
+    this.setData({
+      messages: [...this.data.messages, message]
+    });
+  },
 
-        const assistantMessage = {
-          ...data.assistant_message,
-          timeText: '刚刚'
-        };
+  /**
+   * 处理发送成功
+   */
+  handleSendSuccess(data, tempMessage) {
+    // 更新对话ID
+    if (data.conversation_id) {
+      this.setData({ conversationId: data.conversation_id });
+    }
 
-        this.setData({
-          messages: [...messages, realUserMessage, assistantMessage],
-          thinking: false,
-          sending: false
-        });
+    // 移除临时消息
+    const messages = this.data.messages.filter(m => m.id !== tempMessage.id);
 
-        this.scrollToBottom();
-      })
-      .catch(err => {
-        console.error('发送消息失败:', err);
+    // 添加真实消息
+    const realUserMessage = { ...data.user_message, timeText: '刚刚' };
+    const assistantMessage = { ...data.assistant_message, timeText: '刚刚' };
 
-        // 移除临时消息
-        const messages = this.data.messages.filter(m => m.id !== userMessage.id);
+    this.setData({
+      messages: [...messages, realUserMessage, assistantMessage],
+      thinking: false,
+      sending: false
+    });
 
-        this.setData({
-          messages,
-          thinking: false,
-          sending: false
-        });
+    this.scrollToBottom();
+  },
 
-        util.showError(err.message || '发送失败');
-      });
+  /**
+   * 处理发送失败
+   */
+  handleSendError(err, tempMessage) {
+    console.error('发送消息失败:', err);
+
+    // 移除临时消息
+    const messages = this.data.messages.filter(m => m.id !== tempMessage.id);
+
+    this.setData({
+      messages,
+      thinking: false,
+      sending: false,
+      inputText: tempMessage.content // 恢复输入内容
+    });
+
+    util.showError(err.message || '发送失败，请重试');
   },
 
   /**

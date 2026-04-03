@@ -4,6 +4,15 @@
 const app = getApp();
 
 /**
+ * 请求拦截器配置
+ */
+const requestConfig = {
+  retryTimes: 0, // 当前重试次数
+  maxRetries: 1, // 最大重试次数
+  timeout: 30000 // 请求超时时间
+};
+
+/**
  * 统一的HTTP请求方法
  */
 function request(url, options = {}) {
@@ -12,7 +21,8 @@ function request(url, options = {}) {
       method = 'GET',
       data = {},
       needAuth = true,
-      header = {}
+      header = {},
+      showLoading = false
     } = options;
 
     // 构建完整URL
@@ -29,43 +39,128 @@ function request(url, options = {}) {
       requestHeader['Authorization'] = `Bearer ${app.globalData.accessToken}`;
     }
 
+    // 显示加载提示
+    if (showLoading) {
+      wx.showLoading({ title: '加载中...', mask: true });
+    }
+
     // 发送请求
-    wx.request({
+    const requestTask = wx.request({
       url: fullUrl,
       method,
       data,
       header: requestHeader,
+      timeout: requestConfig.timeout,
       success(res) {
-        // 处理响应
-        if (res.statusCode === 200) {
-          if (res.data.success) {
-            resolve(res.data.data);
-          } else {
-            reject(new Error(res.data.message || '请求失败'));
-          }
-        } else if (res.statusCode === 401) {
-          // token过期，尝试刷新
-          refreshToken().then(() => {
-            // 重新发起请求
-            request(url, options).then(resolve).catch(reject);
-          }).catch(() => {
-            // 刷新失败，跳转到登录页
-            app.clearLoginState();
-            wx.reLaunch({
-              url: '/pages/login/login'
-            });
-            reject(new Error('登录已过期，请重新登录'));
-          });
-        } else {
-          reject(new Error(res.data.message || `请求失败(${res.statusCode})`));
-        }
+        if (showLoading) wx.hideLoading();
+
+        // 统一响应处理
+        handleResponse(res, resolve, reject, url, options);
       },
       fail(err) {
+        if (showLoading) wx.hideLoading();
+
         console.error('请求失败:', err);
-        reject(new Error('网络请求失败，请检查网络连接'));
+
+        // 网络错误处理
+        const errorMsg = getNetworkErrorMessage(err);
+        reject(new Error(errorMsg));
       }
     });
+
+    // 请求超时处理（仅作为备份，wx.request已有timeout）
+    const timeoutId = setTimeout(() => {
+      if (requestTask) {
+        requestTask.abort();
+        if (showLoading) wx.hideLoading();
+        reject(new Error('请求超时，请检查网络'));
+      }
+    }, requestConfig.timeout + 1000);
+
+    // 清理定时器
+    const originalThen = requestTask.then;
+    requestTask.then = function(...args) {
+      clearTimeout(timeoutId);
+      return originalThen.apply(this, args);
+    };
   });
+}
+
+/**
+ * 统一响应处理
+ */
+function handleResponse(res, resolve, reject, url, options) {
+  const statusCode = res.statusCode;
+
+  // 成功响应
+  if (statusCode === 200) {
+    if (res.data.success) {
+      resolve(res.data.data);
+    } else {
+      reject(new Error(res.data.message || '请求失败'));
+    }
+    return;
+  }
+
+  // 未授权 - token过期
+  if (statusCode === 401) {
+    handleUnauthorized(url, options, resolve, reject);
+    return;
+  }
+
+  // 其他错误
+  const errorMsg = getHttpErrorMessage(statusCode, res.data);
+  reject(new Error(errorMsg));
+}
+
+/**
+ * 处理未授权错误
+ */
+function handleUnauthorized(url, options, resolve, reject) {
+  // 避免刷新token接口死循环
+  if (url.includes('/auth/refresh')) {
+    app.clearLoginState();
+    wx.reLaunch({ url: '/pages/login/login' });
+    reject(new Error('登录已过期'));
+    return;
+  }
+
+  // 尝试刷新token
+  refreshToken()
+    .then(() => request(url, options))
+    .then(resolve)
+    .catch(() => {
+      app.clearLoginState();
+      wx.reLaunch({ url: '/pages/login/login' });
+      reject(new Error('登录已过期，请重新登录'));
+    });
+}
+
+/**
+ * 获取HTTP错误消息
+ */
+function getHttpErrorMessage(statusCode, data) {
+  const errorMessages = {
+    400: '请求参数错误',
+    403: '没有权限',
+    404: '请求的资源不存在',
+    500: '服务器错误',
+    502: '网关错误',
+    503: '服务暂时不可用'
+  };
+
+  return data?.message || errorMessages[statusCode] || `请求失败(${statusCode})`;
+}
+
+/**
+ * 获取网络错误消息
+ */
+function getNetworkErrorMessage(err) {
+  if (err.errMsg) {
+    if (err.errMsg.includes('timeout')) return '请求超时，请检查网络';
+    if (err.errMsg.includes('fail')) return '网络连接失败，请检查网络';
+  }
+  return '网络请求失败，请检查网络连接';
 }
 
 /**

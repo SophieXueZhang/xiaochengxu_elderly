@@ -159,16 +159,26 @@ function validatePassword(password) {
 }
 
 /**
- * 节流函数
+ * 节流函数 - 优化版
  */
 function throttle(fn, delay = 500) {
   let timer = null;
+  let lastTime = 0;
+
   return function(...args) {
-    if (timer) return;
-    timer = setTimeout(() => {
-      fn.apply(this, args);
-      timer = null;
-    }, delay);
+    const now = Date.now();
+
+    if (now - lastTime < delay) {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        lastTime = now;
+        fn.apply(this, args);
+      }, delay - (now - lastTime));
+      return;
+    }
+
+    lastTime = now;
+    fn.apply(this, args);
   };
 }
 

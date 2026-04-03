@@ -18,6 +18,48 @@ App({
 
     // 尝试从本地存储恢复登录状态
     this.restoreLoginState();
+
+    // 监听网络状态
+    this.monitorNetwork();
+  },
+
+  /**
+   * 监听网络状态
+   */
+  monitorNetwork() {
+    // 获取当前网络状态
+    wx.getNetworkType({
+      success: (res) => {
+        this.globalData.networkType = res.networkType;
+        if (res.networkType === 'none') {
+          wx.showToast({
+            title: '当前无网络连接',
+            icon: 'none',
+            duration: 3000
+          });
+        }
+      }
+    });
+
+    // 监听网络状态变化
+    wx.onNetworkStatusChange((res) => {
+      this.globalData.networkType = res.networkType;
+      this.globalData.isConnected = res.isConnected;
+
+      if (!res.isConnected) {
+        wx.showToast({
+          title: '网络已断开',
+          icon: 'none',
+          duration: 2000
+        });
+      } else {
+        wx.showToast({
+          title: '网络已连接',
+          icon: 'success',
+          duration: 1500
+        });
+      }
+    });
   },
 
   /**
